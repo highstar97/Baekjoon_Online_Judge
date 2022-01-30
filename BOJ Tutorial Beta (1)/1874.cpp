@@ -3,6 +3,57 @@
 #include <vector>
 
 int N;
+std::stack<int> s;
+std::vector<int> input;
+std::vector<std::string> result;
+
+int main()
+{
+    std::ios::sync_with_stdio(0);
+    std::cin.tie(0);
+
+    std::cin >> N;
+    for(int i=0; i<N; ++i)
+    {
+        int x;
+        std::cin >> x;
+        input.emplace_back(x);
+    }
+
+    int target_index = 0;
+
+    for(int i=1; i<=N; ++i)
+    {
+        s.emplace(i);
+        result.emplace_back("+");
+
+        while(!s.empty() && s.top()==input[target_index])
+        {
+            s.pop();
+            result.emplace_back("-");
+            target_index++;
+        }
+    }
+
+    if(!s.empty())
+    {
+        std::cout << "NO";
+        return 0;
+    }
+    for(auto data : result)
+    {
+        std::cout << data << "\n";
+    }
+    return 0;
+}
+
+
+/* 안 좋은 풀이
+#include <iostream>
+#include <stack>
+#include <vector>
+
+int N;
 std::stack<int> s, temp;
 std::vector<std::string> answer;
 
@@ -64,4 +115,4 @@ int main()
         std::cout << data << '\n';
     }
     return 0;
-}
+}*/
