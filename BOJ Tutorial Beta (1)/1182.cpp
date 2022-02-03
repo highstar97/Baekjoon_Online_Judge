@@ -1,3 +1,5 @@
+// bitset을 활용한 나의 풀이
+/*
 #include <iostream>
 #include <math.h>
 #include <bitset>
@@ -34,4 +36,28 @@ int main()
     }
     std::cout << answer;
     return 0;
+}*/
+// 백트레킹을 이용한 풀이
+#include <iostream>
+
+int arr[20];
+
+int N, S, count = 0;
+
+void DFS(int i, int tmp){
+    if(i == N) return;
+    if(tmp + arr[i] == S) count++;
+
+    DFS(i+1,tmp);
+    DFS(i+1,tmp+arr[i]);
+}
+
+int main() {
+    std::cin >> N >> S;
+    int tmp;
+    for(int i = 0; i < N; i++){
+        std::cin >> arr[i];
+    }
+    DFS(0,0);
+    std::cout << count;
 }
