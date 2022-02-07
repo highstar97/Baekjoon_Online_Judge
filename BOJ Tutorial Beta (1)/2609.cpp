@@ -17,7 +17,7 @@ int GCD(int N, int M)
     }
     else
     {
-        return GCD(N, N%M);
+        return GCD(M, N%M);
     }
 }
 
