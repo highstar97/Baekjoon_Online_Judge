@@ -1,35 +1,31 @@
 #include <iostream>
-#include <vector>
-#include <math.h>
 
-long long min, max;
+long long Min, Max;
+long long num[1000001];
 
 int main()
 {
-    std::cin >> min >> max;
+    int answer = 0;
+    std::cin >> Min >> Max;
 
-    int Total = max - min + 1;
+    for (long long i = 2; i * i <= Max; ++i)
+    {
+        long long n = Min / (i * i);
 
-    std::vector<bool> oo(max-min+1,false);
+        if (Min % (i * i))
+            ++n;
 
-    for(int i=2; i*i <= max; ++i)
-    { 
-        long long square = i*i;
-        long long num = square;
-
-        while(num < min)
+        while (n * i * i <= Max)
         {
-            num += square;
-        }
-        for(long long j=num; j<=max; j+=square)
-        {
-            if(oo[j] == false)
-            {
-                oo[j] = true;
-                Total--;
-            }
+            num[n * i * i - Min] = 1;
+            ++n;
         }
     }
-    std::cout << Total;
-    return 0;
+
+    for(int i=0; i<=Max-Min; ++i)
+    {
+        if(num[i] == 0)
+            ++answer;
+    }
+    std::cout << answer;
 }
