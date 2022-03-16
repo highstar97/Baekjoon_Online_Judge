@@ -18,7 +18,7 @@ int main()
     dp[0] = 0;
     for(int i=1; i<=N; ++i)
     {
-        //dp[i] = price[i];
+        dp[i] = price[i];
         for(int j=1; j<=i/2; ++j)
         {
             dp[i] = std::max(dp[i], dp[j] + dp[i-j]);
