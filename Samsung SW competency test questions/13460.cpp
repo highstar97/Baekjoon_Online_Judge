@@ -1,271 +1,128 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <math.h>
+#include <algorithm>
 
-struct Location
-{
-    int x; int y;
-};
+#define MAX 1e9
+using namespace std;
 
 int N, M;
-Location R, B, O;
+int drow[4] = {-1, 1, 0, 0};
+int dcol[4] = {0, 0, -1, 1};
+bool IsVisited[11][11][11][11];
 
-int dx[4] = {-1,1,0,0};
-int dy[4] = {0,0,-1,1};
-
-typedef std::vector<std::string> Board;
-
-void ShowBoard(Board board)
+struct Point
 {
-    for(auto data : board)
-    {
-        for(int i=0; i<M; i++)
-            std::cout << data[i];
-        std::cout << std::endl;
-    }
-}
+    int row;
+    int col;
+};
 
-void GetRBOLocation(Board& board)
+void BFS(Point Red, Point Blue, vector<vector<char>> &Board)
 {
-    for(int i=0; i<N; i++)
+    queue<pair<pair<Point, Point>, int>> Queue;
+    Queue.emplace(make_pair(make_pair(Red, Blue), 0));
+    IsVisited[Red.row][Red.col][Blue.row][Blue.col] = true;
+
+    while (!Queue.empty())
     {
-        for(int j=0; j<M; j++)
+        Point CurrentRed, CurrentBlue;
+        CurrentRed.row = Queue.front().first.first.row;
+        CurrentRed.col = Queue.front().first.first.col;
+        CurrentBlue.row = Queue.front().first.second.row;
+        CurrentBlue.col = Queue.front().first.second.col;
+        int Count = Queue.front().second;
+        Queue.pop();
+
+        if (Count >= 10)
+            break;
+
+        for (int k = 0; k < 4; ++k)
         {
-            if(board[i][j] == 'R')
+            Point NextRed, NextBlue;
+            NextRed = CurrentRed;
+            NextBlue = CurrentBlue;
+            int RedCount = Count;
+            int BlueCount = Count;
+
+            // Move Red, Until blocked by Wall or Hole
+            while (Board[NextRed.row + drow[k]][NextRed.col + dcol[k]] != '#' && Board[NextRed.row][NextRed.col] != 'O')
             {
-                R.x = i; R.y = j;
-                board[i][j] = '.';
+                NextRed.row += drow[k];
+                NextRed.col += dcol[k];
+                ++RedCount;
             }
-            else if(board[i][j] == 'B')
+            // Move Blue, Until blocked by Wall or Hole
+            while (Board[NextBlue.row + drow[k]][NextBlue.col + dcol[k]] != '#' && Board[NextBlue.row][NextBlue.col] != 'O')
             {
-                B.x = i; B.y = j;
-                board[i][j] = '.';
+                NextBlue.row += drow[k];
+                NextBlue.col += dcol[k];
+                ++BlueCount;
             }
-            else if(board[i][j] == 'O')
+
+            // Blue가 홀에 들어간 경우 최대한 피하기 -> continue
+            if (Board[NextBlue.row][NextBlue.col] == 'O')
+                continue;
+
+            if (Board[NextRed.row][NextRed.col] == 'O')
             {
-                O.x = i; O.y = j;
+                cout << Count + 1;
+                return;
             }
+
+            // Red와 Blue가 같은 위치라면 더 많이 움직인 공을 한 칸 뒤로
+            if (NextRed.row == NextBlue.row && NextRed.col == NextBlue.col)
+            {
+                if (RedCount > BlueCount)
+                {
+                    NextRed.row -= drow[k];
+                    NextRed.col -= dcol[k];
+                }
+                else
+                {
+                    NextBlue.row -= drow[k];
+                    NextBlue.col -= dcol[k];
+                }
+            }
+
+            if (IsVisited[NextRed.row][NextRed.col][NextBlue.row][NextBlue.col] == true)
+                continue;
+            IsVisited[NextRed.row][NextRed.col][NextBlue.row][NextBlue.col] = true;
+            Queue.emplace(make_pair(make_pair(NextRed, NextBlue), Count + 1));
         }
     }
-}
-
-bool Rotate(std::queue<Board>& q, Board board, int d)
-{
-    GetRBOLocation(board);
-    bool isRfirst;
-    switch(d)
-    {
-        case 0:
-            isRfirst = R.x < B.x;
-            break;
-        case 1:
-            isRfirst = R.x > B.x;
-            break;
-        case 2:
-            isRfirst = R.y < B.y;
-            break;
-        case 3:
-            isRfirst = R.y > B.y;
-            break;
-    }
-
-    // 우선순위와 d에 따라 구슬 이동
-    if(isRfirst)
-    {
-        while(board[R.x+dx[d]][R.y+dy[d]] != '#')
-        {
-            R.x += dx[d]; R.y += dy[d];
-            if(board[R.x][R.y] == 'O') break;
-        };
-        board[R.x][R.y] = 'R';
-        while(board[B.x+dx[d]][B.y+dy[d]] != '#' && board[B.x+dx[d]][B.y+dy[d]] != 'R')
-        {
-            B.x += dx[d]; B.y += dy[d];
-            if(board[B.x][B.y] == 'O') break;
-        };
-        board[B.x][B.y] = 'B';
-    }
-    else
-    {
-        while(board[B.x+dx[d]][B.y+dy[d]] != '#')
-        {
-            B.x += dx[d]; B.y += dy[d];
-            if(board[B.x][B.y] == 'O') break;
-        };
-        board[B.x][B.y] = 'B';
-        while(board[R.x+dx[d]][R.y+dy[d]] != '#' && board[R.x+dx[d]][R.y+dy[d]] != 'B')
-        {
-            R.x += dx[d]; R.y += dy[d];
-            if(board[R.x][R.y] == 'O') break;
-        };
-        board[R.x][R.y] = 'R';
-    }
-    q.emplace(board);
-
-    if(B.x == O.x && B.y == O.y) return false;
-    if(R.x == O.x && R.y == O.y) return true;
-    return false;
-}
-
-int bfs(Board& board)
-{
-    int count = 0;
-    bool issuccess = false;
-    std::queue<Board> q;
-    q.emplace(board);
-    while(!q.empty())
-    {
-        Board front_board = q.front();
-        q.pop();
-        for(int i=0; i<4; i++)
-        {
-            issuccess = Rotate(q, front_board, i);
-            if(issuccess)
-                return ++count;
-        }
-        count++;
-    }
-    return -1;
+    cout << "-1";
 }
 
 int main()
 {
-    // 입력 받기
-    std::cin >> N >> M;
-    Board board(N);
-    for(int i=0; i<N; i++)
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
+    // Input
+    Point Red, Blue;
+    cin >> N >> M;
+
+    vector<vector<char>> Board(N, vector<char>(M));
+
+    for (int row = 0; row < N; ++row)
     {
-        std::cin >> board[i];
-    }
-    
-    int result = bfs(board);
-    if(result == -1)
-        std::cout << -1;
-    else 
-    {
-        for(int i=0; i<10; i++)
+        for (int col = 0; col < M; ++col)
         {
-            result -= pow(4,i);
-            if(result <= 0)
+            cin >> Board[row][col];
+            if (Board[row][col] == 'R')
             {
-                std::cout << i+1;
-                break;
+                Red.row = row;
+                Red.col = col;
             }
-        }
-    }
-    return 0;
-}
-
-/* 정답
-#include <iostream>
-#include <vector>
-#include <queue>
-#include <string>
-#include <map>
-using namespace std;
-
-typedef vector<string> Board;
-
-int N,M;
-const int dy[]={-1,1,0,0};
-const int dx[]={0,0,-1,1};
-
-// 보드판 판별
-int check(Board& b){
-    bool hasRed=false,hasBlue=false;
-    for(int i=0;i<N;i++){
-        for(int j=0;j<M;j++){
-            if(b[i][j]=='R') hasRed=true;
-            else if(b[i][j]=='B') hasBlue=true;
-        }
-    }
-    if(!hasBlue) return -1; // 파란 공이 없을 시 실패
-    if(!hasRed) return 1; // 빨간 공이 없을 시 성공
-    return 0; // 아무것도 아닌 경우
-}
-
-// 빨강 파랑 우선순위 판단
-bool isRedFirst(int ry, int rx, int by, int bx, int d){
-    switch(d){
-    case 0: return ry < by;
-    case 1: return ry > by;
-    case 2: return rx < bx;
-    case 3: return rx > bx;
-    }
-}
-
-// 보드판 회전과 구슬 이동
-Board rotate(Board& prev, int d){
-    Board ret(N);
-    for(int i=0;i<N;i++)
-        ret[i]=prev[i];
-
-    int ry,rx,by,bx;
-    for(int i=0;i<N;i++){
-        for(int j=0;j<M;j++){
-            if(ret[i][j]=='B'){
-                ret[i][j]='.';
-                by=i; bx=j;
-            }
-            else if(ret[i][j]=='R'){
-                ret[i][j]='.';
-                ry=i; rx=j;
+            if (Board[row][col] == 'B')
+            {
+                Blue.row = row;
+                Blue.col = col;
             }
         }
     }
 
-    bool redFirst = isRedFirst(ry,rx,by,bx,d);
-
-    while(ret[ry+dy[d]][rx+dx[d]]!='#'){
-        ry+=dy[d]; rx+=dx[d];
-        if(ret[ry][rx]=='O') break;
-    };
-    while(ret[by+dy[d]][bx+dx[d]]!='#'){
-        by+=dy[d]; bx+=dx[d];
-        if(ret[by][bx]=='O') break;
-    };
-
-    if(ret[ry][rx]!='O' && ry==by && rx==bx){
-        if(redFirst){ by-=dy[d]; bx-=dx[d]; }
-        else { ry-=dy[d]; rx-=dx[d]; }
-    }
-
-    if(ret[ry][rx]!='O') ret[ry][rx]='R';
-    if(ret[by][bx]!='O') ret[by][bx]='B';
-
-    return ret;
+    // Solution
+    BFS(Red, Blue, Board);
 }
-
-int bfs(Board& init){
-    map<Board,int> m;
-    m[init]=0;
-    queue<Board> q;
-    q.push(init);
-    while(!q.empty()){
-        Board cur = q.front();
-        q.pop();
-        int curDist = m[cur];
-        if(curDist>=10) break;
-        for(int i=0;i<4;i++){
-            Board next = rotate(cur,i);
-            int res = check(next);
-            if(res==-1) continue;
-            else if(res==1) return curDist+1;
-            if(m.find(next)==m.end()){
-                m[next]=curDist+1;
-                q.push(next);
-            }
-        }
-    }
-    return -1;
-}
-
-int main(){
-    cin>>N>>M;
-    Board board(N);
-    for(int i=0;i<N;i++)
-        cin>>board[i];
-    cout<<bfs(board);
-    return 0;
-}*/
