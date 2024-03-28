@@ -1,70 +1,239 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <algorithm>
 
-int N;
-typedef std::vector<std::vector<int>> Board;
+using namespace std;
 
-void MoveToDirection(std::queue<std::pair<Board,int>>& q, int d)
+int N, Answer;
+
+void Print(vector<vector<int>> Board)
 {
-    Board next_board = q.front().first;
-    switch(d)
+    cout << "------------------------------\n";
+    for (int row = 0; row < N; ++row)
     {
-        case 0:
+        for (int col = 0; col < N; ++col)
         {
-            for(int j=0; j<N; j++)
-            {
-                for(int i=0; i<N; i++)
-                {
-                    for(int k=i+1; k<N; k++)
-                    {
-                        if(next_board[k][])
-                        if(next_board[i][j] == next_board[k][j]);
-                    }
-                }
-            }
+            cout << Board[row][col] << " ";
         }
-        case 1:
-        {
-
-        }
-        case 2:
-        {
-
-        }
-        case 3:
-        {
-
-        }
+        cout << "\n";
     }
+    cout << "------------------------------\n";
 }
 
-int bfs(Board board)
+vector<vector<int>> Up(vector<vector<int>> Board)
 {
-    std::queue<std::pair<Board,int>> q;
-    q.emplace(std::make_pair(board,0));
-
-    while(!q.empty())
+    for (int col = 0; col < N; ++col)
     {
-        for(int i=0; i<4; i++)
+        queue<int> Queue;
+        for (int row = 0; row < N; ++row)
         {
-            MoveToDirection(q,i);
+            if (Board[row][col] == 0)
+                continue;
+            Queue.emplace(Board[row][col]);
+            Board[row][col] = 0;
+        }
+
+        for (int row = 0; row < N; ++row)
+        {
+            if (Queue.size() >= 2)
+            {
+                int first = Queue.front();
+                Queue.pop();
+                int second = Queue.front();
+
+                if (first == second)
+                {
+                    Board[row][col] = first * 2;
+                    Queue.pop();
+                }
+                else
+                {
+                    Board[row][col] = first;
+                }
+            }
+            else if (Queue.size() == 1)
+            {
+                Board[row][col] = Queue.front();
+                Queue.pop();
+            }
+            else // Queue.size() == 0
+            {
+                break;
+            }
         }
     }
+    return Board;
+}
+vector<vector<int>> Down(vector<vector<int>> Board)
+{
+    for (int col = 0; col < N; ++col)
+    {
+        queue<int> Queue;
+        for (int row = N - 1; row >= 0; --row)
+        {
+            if (Board[row][col] == 0)
+                continue;
+            Queue.emplace(Board[row][col]);
+            Board[row][col] = 0;
+        }
+
+        for (int row = N - 1; row >= 0; --row)
+        {
+            if (Queue.size() >= 2)
+            {
+                int first = Queue.front();
+                Queue.pop();
+                int second = Queue.front();
+
+                if (first == second)
+                {
+                    Board[row][col] = first * 2;
+                    Queue.pop();
+                }
+                else
+                {
+                    Board[row][col] = first;
+                }
+            }
+            else if (Queue.size() == 1)
+            {
+                Board[row][col] = Queue.front();
+                Queue.pop();
+            }
+            else // Queue.size() == 0
+            {
+                break;
+            }
+        }
+    }
+    return Board;
+}
+vector<vector<int>> Left(vector<vector<int>> Board)
+{
+    for (int row = 0; row < N; ++row)
+    {
+        queue<int> Queue;
+        for (int col = 0; col < N; ++col)
+        {
+            if (Board[row][col] == 0)
+                continue;
+            Queue.emplace(Board[row][col]);
+            Board[row][col] = 0;
+        }
+
+        for (int col = 0; col < N; ++col)
+        {
+            if (Queue.size() >= 2)
+            {
+                int first = Queue.front();
+                Queue.pop();
+                int second = Queue.front();
+
+                if (first == second)
+                {
+                    Board[row][col] = first * 2;
+                    Queue.pop();
+                }
+                else
+                {
+                    Board[row][col] = first;
+                }
+            }
+            else if (Queue.size() == 1)
+            {
+                Board[row][col] = Queue.front();
+                Queue.pop();
+            }
+            else // Queue.size() == 0
+            {
+                break;
+            }
+        }
+    }
+    return Board;
+}
+vector<vector<int>> Right(vector<vector<int>> Board)
+{
+    for (int row = 0; row < N; ++row)
+    {
+        queue<int> Queue;
+        for (int col = N - 1; col >= 0; --col)
+        {
+            if (Board[row][col] == 0)
+                continue;
+            Queue.emplace(Board[row][col]);
+            Board[row][col] = 0;
+        }
+
+        for (int col = N - 1; col >= 0; --col)
+        {
+            if (Queue.size() >= 2)
+            {
+                int first = Queue.front();
+                Queue.pop();
+                int second = Queue.front();
+
+                if (first == second)
+                {
+                    Board[row][col] = first * 2;
+                    Queue.pop();
+                }
+                else
+                {
+                    Board[row][col] = first;
+                }
+            }
+            else if (Queue.size() == 1)
+            {
+                Board[row][col] = Queue.front();
+                Queue.pop();
+            }
+            else // Queue.size() == 0
+            {
+                break;
+            }
+        }
+    }
+    return Board;
+}
+
+void DFS(int Depth, vector<vector<int>> Board)
+{
+    if (Depth == 5)
+    {
+        for (int row = 0; row < N; ++row)
+        {
+            for (int col = 0; col < N; ++col)
+            {
+                Answer = max(Answer, Board[row][col]);
+            }
+        }
+        return;
+    }
+
+    DFS(Depth + 1, Up(Board));
+    DFS(Depth + 1, Down(Board));
+    DFS(Depth + 1, Left(Board));
+    DFS(Depth + 1, Right(Board));
 }
 
 int main()
 {
-    std::cin >> N;
-    Board board(N,std::vector<int> (N,0));
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
 
-    for(int i=0; i<N; i++)
+    cin >> N;
+    vector<vector<int>> Board(N, vector<int>(N, 0));
+    for (int i = 0; i < N; ++i)
     {
-        for(int j=0; j<N; j++)
+        for (int j = 0; j < N; ++j)
         {
-            std::cin >> board[i][j];
+            cin >> Board[i][j];
         }
     }
 
-    return bfs(board);
+    DFS(0, Board);
+    cout << Answer << endl;
 }
