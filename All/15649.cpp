@@ -1,3 +1,9 @@
+/*
+    순열 문제.
+
+    next_permutaion + reverse를 기억하자.
+*/
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
