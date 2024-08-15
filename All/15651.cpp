@@ -1,3 +1,8 @@
+/*
+    중복 순열 문제 : 숫자 중복 사용 가능한 순열
+
+    중복 순열은 BackTracking!!!
+*/
 #include <iostream>
 #include <vector>
 
