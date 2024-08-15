@@ -1,3 +1,9 @@
+/*
+    비내림차순 중복 순열 문제 : 숫자 중복 사용 가능한 순열. 단 비내림차순
+        비내림차순 : 길이가 K인 수열 A가 A1 ≤ A2 ≤ ... ≤ AK-1 ≤ AK를 만족
+
+    중복 순열은 BackTracking!!! + 비내림차순 조건 추가
+*/
 #include <iostream>
 #include <vector>
 
